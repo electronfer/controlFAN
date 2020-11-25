@@ -13,6 +13,8 @@
 #define DHTPIN 2     
 #define DHTTYPE DHT22
 
+#define TEMPERATURA_MIN 25.0f
+
 const word PWM_FREQ_HZ = 20000;
 const word TCNT1_TOP = 16000000/(2*PWM_FREQ_HZ);
 
@@ -123,10 +125,10 @@ void loop(){
 
 #else
     float t = dht.readTemperature();
-    unsigned int valor =  ( t <= 25 ) ? 00 :
-                          ( t <= 26 ) ? 25 :
-                          ( t <= 27 ) ? 50 :
-                          ( t <= 28 ) ? 75 : 100;
+    unsigned int valor =  ( t <= TEMPERATURA_MIN )       ? 00 :
+                          ( t <= TEMPERATURA_MIN + 0.5f ) ? 25 :
+                          ( t <= TEMPERATURA_MIN + 1.0f) ? 50 :
+                          ( t <= TEMPERATURA_MIN + 1.5f ) ? 75 : 100;
     setPwmDuty(valor);
     delay(2*TIMESTEP);
     /*

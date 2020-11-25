@@ -1,14 +1,26 @@
+//======================//
+//=     LIBREARIAS     =//
+//======================//
+#include "DHT.h"
+
+//=======================================//
+//=     MACROS Y VARIABLES GLOBALES     =//
+//=======================================//
+#define TIMER 1
 #define MAX_PWM 75
 #define NUM_FANS 6
 #define TIMESTEP 7e3
+#define DHTPIN 2     
+#define DHTTYPE DHT22
 
-const byte OC1A_PIN = 9;
-const byte OC1B_PIN = 10;
-
-const word PWM_FREQ_HZ = 20000; //Adjust this value to adjust the frequency
+const word PWM_FREQ_HZ = 20000;
 const word TCNT1_TOP = 16000000/(2*PWM_FREQ_HZ);
 
-#define TIMER 1
+
+//================================================//
+//=     OBJETO TIPO DHT (SENSOR TEMPERATURA)     =//
+//================================================//
+DHT dht(DHTPIN, DHTTYPE);
 
 unsigned short int pinesFAN[NUM_FANS] = { 
   3 , //OC2B
@@ -25,6 +37,7 @@ void cicloPWM(byte ocrb);
 void configura25KhzPwm();
 
 void setup() {
+  dht.begin();
 #if TIMER == 0
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
@@ -109,8 +122,14 @@ void loop(){
   }
 
 #else
-    setPwmDuty(0);
+    float t = dht.readTemperature();
+    unsigned int valor =  ( t <= 25 ) ? 00 :
+                          ( t <= 26 ) ? 25 :
+                          ( t <= 27 ) ? 50 :
+                          ( t <= 28 ) ? 75 : 100;
+    setPwmDuty(valor);
     delay(2*TIMESTEP);
+    /*
     setPwmDuty(25);
     delay(TIMESTEP);
     setPwmDuty(50);
@@ -125,6 +144,7 @@ void loop(){
     delay(TIMESTEP);
     setPwmDuty(25);
     delay(TIMESTEP);
+    */
 #endif
 }
 
